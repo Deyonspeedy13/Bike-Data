@@ -1,0 +1,215 @@
+---
+title: "Bike Trip Data"
+author: "Deyon Haripal"
+date: '2022-06-02'
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## How does a bike-share navigate speedy success?
+
+#### Scenario
+You are a junior data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes differently. 
+From these insights,your team will design a new marketing strategy to convert casual riders into annual members. But first, Cyclistic executives must approve your recommendations, so they must be backed up with compelling data insights and professional data visualizations.
+ 
+#### Characters and teams 
+* Cyclistic: A bike-share program that features more than 5,800 bicycles and 600 docking stations. Cyclistic sets itself apart by also offering reclining bikes, hand tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities and riders who can’t use a standard two-wheeled bike. The majority of riders opt for traditional bikes; about 8% of riders use the assistive options. Cyclistic users are more likely to ride for leisure, but about 30% use them to commute to work each day.
+
+* Lily Moreno: The director of marketing and your manager. Moreno is responsible for the development of campaigns
+and initiatives to promote the bike-share program. These may include email, social media, and other channels.
+* Cyclistic marketing analytics team: A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. You joined this team six months ago and have been busy learning about Cyclistic’s mission and business goals — as well as how you, as a junior data analyst, can help Cyclistic achieve them.
+* Cyclistic executive team: The notoriously detail-oriented executive team will decide whether to approve the recommended marketing program
+
+Three questions have been asked that will guide the future marketing program.
+
+### Ask
+Moreno assigns us the question: **How do annual and casual riders use Cyclistic bikes differently?**
+
+### Prepare
+The data is made available by Motivate International Inc under a license. This is a public data set. The data is located via a html link. The data is stored a zip files and by each month. For this case study, we are asked to download 12 months worth of data. The months for this study are from March 2021 to February 2022. The data was then downloaded to my personal computer. The data is a csv file one you unzip the file. The data is reliable as it is collected by the client, organized into csv files (structured), comprehensive, current, and cited.
+
+Credit card information isn't being used and each trip creates a unique trip id per individual. The data will be used to help answer the business task of identifying user trends between casual and member riders. There are some blank values and replicated values in a few of the data sets. 
+
+### Process
+The tools I will be using will be Microsoft Excel and R for data cleaning, and Tableau for data visualization. Excel will be used for making new columns and tidying up the data and R will be used for merging all 12 months worth of data into a single data set and any additional cleanup and data wrangling. 
+
+Excel was used to get rid of any duplicated values, checking for any wrong values such as negative time or zero time, changing the data types of certain columns, and formatting the data to make it easier to read and comprehend. 
+
+During this phase, the data from March 2021 to February 2022 was downloaded. I then created a folder called Trip_data and two sub folders called Clean_Data and Original_Data.Original_Data housed the files that were downloaded and then I replicated the data into the Clean_Data folder. I renamed all the files by the name of the abbreviated month followed by an underscore and the year i.e Mar_2021.
+
+I opened each file through Excel and added a column called ride_length to each file. the ride_length was calculated by subtracting the columns "started_at" from the column "ended_at". Then I formatted the ride_length column as HH:MM:SS.
+
+Another column was created per file called day_of_week. This column was created from the excel function WEEKDAY(). This function calculated the day of the week by taking in the argument started_at followed by 1 i.e =WEEKDAY(C2,1). The 1 represents Sunday all the way to 7 which would be Saturday.
+
+Each file was then checked for duplicated values for the Trip ID via Excel since each trip should be unique. There were a couple finds and were removed. I removed data that had a negative ride_length by adding a filter to ride_length. Any time that was negative or zero was removed from the data set. I also checked to see if there were only two member types;member or casual. I also did the same thing for rideable_type as there should only be three types of rides; classic, electric, or docked. 
+
+I removed the latitude and longitude columns as I found those unnecessary. I validated the dates by using the data validation tool excel has. I selected Date and listed the start date and end date for each month for each respective month. I then sorted the data with the largest ride_length to see what was causing long ride lengths. It just so happens that the bikes are taken to and from HQ. When I filtered start_station_name, I selected Base - 2132 W Hubbard Warehouse and deleted all data that has this station name. I did the same thing for end_station_name. I did this for each file. 
+
+### Analyze
+For this phase, I switched tools from Excel to R because combining all the months into a single worksheet would take too long to process.
+
+I first installed all needed packages and loaded them.
+
+```{r loading packages}
+library(tidyverse)
+library(lubridate)
+```
+
+Next, I set my working directory to where my files were located.
+
+Importing all the files.
+
+```{r import files}
+Mar_2021 <- read_csv("Mar_2021_trip_data.csv")
+Apr_2021 <- read_csv("Apr_2021_trip_data.csv")
+May_2021 <- read_csv("May_2021_trip_data.csv")
+Jun_2021 <- read_csv("Jun_2021_trip_data.csv")
+Jul_2021 <- read_csv("Jul_2021_trip_data.csv")
+Aug_2021 <- read_csv("Aug_2021_trip_data.csv")
+Sept_2021 <-read_csv("Sept_2021_trip_data.csv")
+Oct_2021 <- read_csv("Oct_2021_trip_data.csv")
+Nov_2021 <- read_csv("Nov_2021_trip_data.csv")
+Dec_2021 <- read_csv("Dec_2021_trip_data.csv")
+Jan_2022 <- read_csv("Jan_2022_trip_data.csv")
+Feb_2022 <- read_csv("Feb_2022_trip_data.csv")
+```
+
+Checking all column names to be the same. 
+
+```{r check column names}
+colnames(Mar_2021)
+colnames(Apr_2021)
+colnames(May_2021)
+colnames(Jun_2021)
+colnames(Jul_2021)
+colnames(Aug_2021)
+colnames(Sept_2021)
+colnames(Oct_2021)
+colnames(Nov_2021)
+colnames(Dec_2021)
+colnames(Jan_2022)
+colnames(Feb_2022)
+```
+
+Checking all data types for each column.
+```{r look at data types}
+glimpse(Mar_2021)
+glimpse(Apr_2021)
+glimpse(May_2021)
+glimpse(Jun_2021)
+glimpse(Jul_2021)
+glimpse(Aug_2021)
+glimpse(Sept_2021)
+glimpse(Oct_2021)
+glimpse(Nov_2021)
+glimpse(Dec_2021)
+glimpse(Jan_2022)
+glimpse(Feb_2022)
+```
+
+Combine all files into a single file.
+```{r combine files}
+
+Year_trip_data <-bind_rows(Mar_2021,Apr_2021,May_2021,Jun_2021,Jul_2021,
+                           Aug_2021,Sept_2021,Oct_2021,Nov_2021,
+                           Dec_2021,Jan_2022,Feb_2022)
+```
+
+View column names for new data frame and data types.
+```{r check column names and data types }
+colnames(Year_trip_data)
+glimpse(Year_trip_data) 
+```
+ Add date, month, day, and year columns to data set.
+```{r adding month, day, year}
+Year_trip_data$date <- as.Date(Year_trip_data$started_at, format = "%m/%d/%Y")
+Year_trip_data$month <- format(as.Date(Year_trip_data$date), "%B")
+Year_trip_data$day <- format(as.Date(Year_trip_data$date), "%d")
+Year_trip_data$year <- format(as.Date(Year_trip_data$date), "%Y")
+Year_trip_data$day_of_week <- format(as.Date(Year_trip_data$date), "%A")
+```
+
+Just to verify if data is clean, I deleted all rows where the ride_length is less than or equal to 0.
+
+```{r delete rows and view }
+Year_trip_data <-Year_trip_data[!(Year_trip_data$ride_length <= 0),] 
+View(Year_trip_data)
+```
+ 
+ Converting ride_length to numeric data type.
+```{r convert to numeric class}
+Year_trip_data$ride_length <- as.numeric(Year_trip_data$ride_length)
+```
+Check the class of ride_length to see if it has been converted
+```{r check class}
+class(Year_trip_data$ride_length) 
+```
+Divide ride_length by 60 to get ride_length in minutes.
+```{r get minutes}
+Year_trip_data$ride_length <- (Year_trip_data$ride_length)/60 ##divide by 60 to get mins
+```
+View descriptive stats about ride_length.
+```{r summary}
+summary(Year_trip_data$ride_length) 
+```
+Next we aggregate the data to make comparisons between the casual and member riders' ride_length.
+```{r aggregate}
+##Compare members and casual riders about ride_length
+aggregate(Year_trip_data$ride_length~Year_trip_data$member_casual, FUN = mean)
+aggregate(Year_trip_data$ride_length~Year_trip_data$member_casual, FUN = median)
+aggregate(Year_trip_data$ride_length~Year_trip_data$member_casual, FUN = max)
+aggregate(Year_trip_data$ride_length~Year_trip_data$member_casual, FUN = min)
+```
+Since casual members have the higher mean, median, and max >>> Spending more time on trips
+
+Ordering the weekdays
+```{r}
+Year_trip_data$day_of_week <- ordered(Year_trip_data$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+aggregate(Year_trip_data$ride_length ~ Year_trip_data$member_casual + Year_trip_data$day_of_week, FUN = mean)
+```
+Counting the number of weekdays for the whole year and viewing a tibble.
+```{r count the weekdays}
+days <-count(Year_trip_data,day_of_week)
+tibble(days)
+```
+Renaming the 2nd column and ordering the days of the week.
+```{r rename and order weekdays}
+days <-rename(days,num_of_trips = n) 
+days$day_of_week <- ordered(days$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+Next I checked to see how many trips there were per month.
+```{r trips per month}
+Months <- count(Year_trip_data,month) 
+tibble(Months)
+```
+Counting the number of members.
+```{r counting members}
+Member <- count(Year_trip_data,member_casual) 
+tibble(Member)
+```
+Counting the number of ride types.
+```{r counting ride types}
+ride_type <- count(Year_trip_data,rideable_type) 
+tibble(ride_type)
+```
+Saved data to a variable called counts.
+```{r}
+counts <- aggregate(Year_trip_data$ride_length ~ Year_trip_data$member_casual + Year_trip_data$day_of_week, FUN = mean)
+```
+Lastly, in R, I saved the file to my desktop so I can export this data (counts) to Tableau for my visualizations. 
+
+## Data Viz
+I did conduct visuals using R but I found that Tableau did a better job with story telling.
+You can access my Tableau profile using this [link](https://public.tableau.com/app/profile/deyon.haripal) and click on Bike Trip Data. 
+
+## Conclusion
+Overall, based on the data visualization, we can see that casual riders are riding more than members even when there are more members than casual riders.On Saturdays and Sundays, there are more casual riders than members and during the weekdays there are more members than casual riders. Casual riders have a super majority of having longer ride lengths for every month. 
+
+Cyclist can have an incentive for members to stride for longer ride times such as earning credit on their account or a discount of some sort. They can also try to entice casual riders to become members by offering a low cost subscription. Another action Cyclist can take is to send notifications to members to remind them to take their daily ride. 
+
+
+
